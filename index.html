@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>SF Muni Vehicle Map</title>
+		<link rel="stylesheet" href="style.css" />
+		<script src="angular.min.js"></script>
+		<script src="d3-v4.min.js"></script>
+		<script type="text/javascript">
+			var app = angular.module("sf-muni", []);
+			app.controller("VehicleController", ["$scope", "$http", "$interval", function($scope, $http, $interval) {
+				//Width and height
+				var width = 700,
+					height = 500,
+					baseUrl = "http://webservices.nextbus.com/service/publicJSONFeed?a=sf-muni&";
+
+				//Define map projection
+				var projection = d3.geoMercator().scale(1).translate([0, 0]);
+
+				//Define path generator
+				var path = d3.geoPath().projection(projection);
+
+				//Create SVG element
+				var svg = d3.select("body").append("svg").attr("width", width).attr("height", height);
+
+				d3.json("neighborhoods.json", function(json) {
+					// Calculate bounding box transforms for entire collection
+					var bounds = path.bounds(json),
+						scale = .95 / Math.max((bounds[1][0] - bounds[0][0]) / width, (bounds[1][1] - bounds[0][1]) / height),
+						translate = [
+						(width - scale * (bounds[1][0] + bounds[0][0])) / 2,
+						(height - scale * (bounds[1][1] + bounds[0][1])) / 2
+					];
+
+					// Update the projection    
+					projection.scale(scale).translate(translate);
+
+					//Bind data and create one path per GeoJSON feature
+					svg.selectAll("path").data(json.features).enter().append("path").attr("d", path);
+				});
+
+				function fetchVehiclesByRoute() {
+					$http({
+						method: "GET",
+						url: baseUrl + "command=routeList"
+					}).then(function successCallback(response) {
+						$scope.routes = response.data.route;
+						$scope.selectedRoute = $scope.routes[0];
+						$scope.getVehicleLocations();
+						$scope.drawStopsForRoute();
+						$interval($scope.getVehicleLocations, 15000, false, 0);
+					});
+				}
+				
+				$scope.getVehicleLocations = function() {
+					$http({
+						method: "GET",
+						url: baseUrl + "command=vehicleLocations&t=0&r=" + $scope.selectedRoute.tag
+					}).then(function successCallback(response) {                        
+						if (undefined !== response.data.vehicle) {
+							var vehicles = response.data.vehicle;
+							d3.selectAll("[name='buses']").remove();
+							vehicles.forEach(function(vehicle) {
+								let x = projection([vehicle.lon, vehicle.lat])[0];
+								let y = projection([vehicle.lon, vehicle.lat])[1];
+								svg.append("svg:image")
+									.attr("xlink:href", "icon.svg")
+									.attr("id", vehicle.id)
+									.attr("name", "buses")
+									.attr("width", 10)
+									.attr("height", 10)
+									.attr("transform", " translate(" + x + ", " + y + ") rotate(" + vehicle.heading + ")");					
+							});
+						} else {
+							alert("No vehicles found for the selected route");
+						}
+					}, function errorCallback(response) {
+						console.log(response);
+					});
+				};
+
+				$scope.drawStopsForRoute = function() {
+					$http({
+						method: "GET",
+						url: baseUrl + "command=routeConfig&terse=true&r=" + $scope.selectedRoute.tag
+					}).then(function successCallback(response) {                        
+						var route = response.data.route;
+						if (undefined !== route && undefined !== route.direction) {
+							var stops = route.stop;
+							var stopsByRoute = new Map();
+							stops.forEach((stop) => {
+								stopsByRoute.set(stop.tag, {
+									lat: stop.lat,
+									lon: stop.lon,
+									title: stop.title
+								});
+							});
+
+							var directions = route.direction;
+							d3.selectAll("[name='direction']").remove();
+							directions.forEach((direction) => {
+								if (direction.useForUI) {
+									let stops = direction.stop;
+									stops.forEach((stop) => {
+										var coordinates = [
+											stopsByRoute.get(stop.tag).lon,
+											stopsByRoute.get(stop.tag).lat
+										];
+										svg.append("circle")
+											.attr("cx", function (d) { return projection(coordinates)[0]; })
+											.attr("cy", function (d) { return projection(coordinates)[1]; })
+											.attr("r", "1px")
+											.attr("name", "direction")
+											.style("fill", "white");
+									});
+								}
+							});
+						}
+					}, function errorCallback(response) {
+						console.log(response);
+					});
+				};
+
+				fetchVehiclesByRoute();
+			}]);
+		</script>
+	</head>
+	<body ng-controller="VehicleController" ng-app="sf-muni">
+		<select ng-change="getVehicleLocations(); drawStopsForRoute()"
+			ng-model-options="{ debounce: 350 }"
+			ng-model="selectedRoute"
+			ng-options="route as route.title for route in routes track by route.tag">
+		</select>
+	</body>
+</html>

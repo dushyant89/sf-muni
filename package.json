@@ -1,0 +1,15 @@
+{
+  "name": "sf-muni",
+  "version": "1.0.0",
+  "description": "Real time display of SF-Muni vehicles on San Francisco Map",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node_modules/http-server/bin/http-server"
+  },
+  "author": "Dushyant Sabharwal (dushyant89.github.io)",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.10.0"
+  }
+}
