@@ -1,0 +1,45 @@
+path {
+    stroke: #616161; /* grey darken-2 */
+    stroke-width: 0.5px;
+    fill: #4fc3f7; /* light-blue lighten-2 */ 
+}
+
+path[name='neighborhood'] {
+    fill: #66bb6a; /* green lighten-1 */
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.main {
+    display: inline-flex;
+    flex-direction: row;
+    width: 100%;
+    margin: auto;
+}
+
+.controls {
+    margin: 10px;
+}
+
+.control-group {
+    padding: 10px;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+.btn {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.svg-map {
+    border: 2px solid #848080;
+    border-radius: 10px;
+    background-color: #fff9c4; /* yellow lighten-4 */
+    margin-left: 40px;
+}
+
+.route-list {
+    height: 30px;
+    border: 1px solid darkgrey;
+}
