@@ -6,15 +6,17 @@
 		<link rel="stylesheet" href="assets/styles/style.css" />
 		<script src="scripts/angular.min.js"></script>
 		<script src="scripts/d3-v4.min.js"></script>
+		<script src="scripts/app.js"></script>
 		<script src="scripts/index.js"></script>
+		<script src="scripts/components/message-banner.js"></script>
 	</head>
-	<body ng-controller="VehicleController" ng-app="sf-muni">
+	<body ng-controller="MapController" ng-app="sf-muni">
 		<div class="main">
 			<div class="controls">
 				<div class="control-group">
 					<label> Routes </label>
 					<select class="route-list"
-						ng-change="getVehicleLocations();"
+						ng-change="getVehicleLocations(true);"
 						ng-model-options="{ debounce: 350 }"
 						ng-model="selectedRoute"
 						ng-options="route as route.title for route in routes track by route.tag">
@@ -22,13 +24,18 @@
 				</div>
 				<div class="control-group">
 					<label> Zoom in/out </label>
-					<button class="btn" ng-click="modifyScale(true);" type="button"> + </button>
-					<button class="btn" ng-click="modifyScale(false);" type="button"> - </button>
+					<button class="btn" ng-click="modifyZoomLevel(true);" type="button"> + </button>
+					<button class="btn" ng-click="modifyZoomLevel(false);" type="button"> - </button>
 				</div>
 			</div>
 			<div class="svg-map">
 				<svg id="sf-muni-map-svg"> </svg>
 			</div>
 		</div>
+		<message-banner show-banner="messagesForUser.show"
+			type="messagesForUser.type"
+			title="messagesForUser.title"
+			description="messagesForUser.description">
+		</message-banner>
 	</body>
 </html>

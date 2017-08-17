@@ -1,45 +1,81 @@
+body {
+	font-family: Helvetica, Arial, sans-serif;
+}
+
 path {
-    stroke: #616161; /* grey darken-2 */
-    stroke-width: 0.5px;
-    fill: #4fc3f7; /* light-blue lighten-2 */ 
+	stroke: #616161; /* grey darken-2 */
+	stroke-width: 0.5px;
+	fill: #4fc3f7; /* light-blue lighten-2 */
 }
 
 path[name='neighborhood'] {
-    fill: #66bb6a; /* green lighten-1 */
-    stroke: black;
-    stroke-width: 1px;
+	fill: #66bb6a; /* green lighten-1 */
+	stroke: black;
+	stroke-width: 1px;
 }
 
 .main {
-    display: inline-flex;
-    flex-direction: row;
-    width: 100%;
-    margin: auto;
+	display: inline-flex;
+	flex-direction: row;
+	width: 100%;
+	margin: auto;
 }
 
 .controls {
-    margin: 10px;
+	margin: 10px;
 }
 
 .control-group {
-    padding: 10px;
-    font-family: Helvetica, Arial, sans-serif;
+	padding: 10px;
 }
 
 .btn {
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
 }
 
 .svg-map {
-    border: 2px solid #848080;
-    border-radius: 10px;
-    background-color: #fff9c4; /* yellow lighten-4 */
-    margin-left: 40px;
+	border: 2px solid #848080;
+	border-radius: 10px;
+	background-color: #fff9c4; /* yellow lighten-4 */
+	margin-left: 40px;
 }
 
 .route-list {
-    height: 30px;
-    border: 1px solid darkgrey;
+	height: 30px;
+	border: 1px solid darkgrey;
+}
+
+.message-banner {
+	border-radius: 5px;
+	display: block;
+	position: fixed;
+	top: 20px;
+	left: 45%;
+	z-index: 1;
+}
+
+.message-banner-title {
+	font-weight: bold;
+}
+
+.message-banner-message {
+	margin-top: 10px;
+}
+
+.message-banner-close {
+	cursor: pointer;
+	font-size: 20px;
+	float: right;
+}
+
+.message-success {
+	border: 1px solid #1b5e20; /* green darken-4 */
+	background-color: #81c784; /* green lighten-2 */
+}
+
+.message-error {
+	background-color: #ef9a9a; /* red lighten-3 */
+	border: 1px solid #b71c1c; /* red darken-4 */
 }
