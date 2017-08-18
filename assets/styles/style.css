@@ -41,6 +41,7 @@ path[name='neighborhood'] {
 	border-radius: 15px;
 	background-color: #effbfd;
 	margin-left: 40px;
+	zoom: 1.4;
 }
 
 .route-list {

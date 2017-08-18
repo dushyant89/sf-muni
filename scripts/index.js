@@ -1,17 +1,17 @@
 /*
 	@TODO
-	1. Showing the loading icon before data loads.
 	3. Writing unit tests.
 */
-angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$interval", "mapsToLoad", "agency",
-	function($scope, $http, $interval, mapsToLoad, agency) {
-		let baseUrl = "http://webservices.nextbus.com/service/publicJSONFeed?a=" + agency + "&",
+angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$interval", "mapsToLoad", "agency", "apiResponseType",
+	function($scope, $http, $interval, mapsToLoad, agency, apiResponseType) {
+		let baseUrl = "http://webservices.nextbus.com/service/" + apiResponseType + "?a=" + agency + "&",
 			projection = d3.geoMercator().scale(1).translate([0, 0]),
 			path = d3.geoPath().projection(projection),
 			width="700",
 			height="500",
 			svg = d3.select("svg").attr("width", width).attr("height", height),
 			bounds, scale, translate;
+		const mapZoomFactor = 0.10;
 		
 		$scope.messagesForUser = {
 			show: false
@@ -24,7 +24,7 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 			queue.defer(d3.json, mapToLoad, prepareMap);
 		});
 		// Called once all the operations in the queue are completed.
-		queue.awaitAll(function(error) {
+		queue.awaitAll((error) => {
 			if (error) {
 				throw error;
 			} else {
@@ -241,9 +241,9 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 		$scope.modifyZoomLevel = function(increase) {
 			let currentZoomLevel = parseFloat(svg.style("zoom"));
 			if (increase) {
-				currentZoomLevel += currentZoomLevel * 0.10;
+				currentZoomLevel += currentZoomLevel * mapZoomFactor;
 			} else {
-				currentZoomLevel -= currentZoomLevel * 0.10;
+				currentZoomLevel -= currentZoomLevel * mapZoomFactor;
 			}
 
 			svg.style("zoom", currentZoomLevel);
