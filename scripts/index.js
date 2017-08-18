@@ -2,13 +2,12 @@
 	@TODO
 	3. Writing unit tests.
 */
-angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$interval", "mapsToLoad", "agency", "apiResponseType",
-	function($scope, $http, $interval, mapsToLoad, agency, apiResponseType) {
-		let baseUrl = "http://webservices.nextbus.com/service/" + apiResponseType + "?a=" + agency + "&",
-			projection = d3.geoMercator().scale(1).translate([0, 0]),
+angular.module("sf-muni").controller("MapController", ["$scope", "$interval", "mapsToLoad", "vehicleLocationFactory", "vehicleDirectionFactory", "routeListFactory",
+	function($scope, $interval, mapsToLoad, vehicleLocationFactory, vehicleDirectionFactory, routeListFactory) {
+		let projection = d3.geoMercator().scale(1).translate([0, 0]),
 			path = d3.geoPath().projection(projection),
-			width="700",
-			height="500",
+			width = "700",
+			height = "500",
 			svg = d3.select("svg").attr("width", width).attr("height", height),
 			bounds, scale, translate;
 		const mapZoomFactor = 0.10;
@@ -69,18 +68,17 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 			projection.scale(scale).translate(translate);
 		}
 
-		function fetchVehiclesByRoute() {
-			$http({
-				method: "GET",
-				url: baseUrl + "command=routeList"
-			}).then(function successCallback(response) {
-				$scope.routes = response.data.route;
+		function fetchRouteList() {
+			routeListFactory.getRoutes().then((routes) => {
+				$scope.routes = routes;
 				$scope.selectedRoute = $scope.routes[0];
 				$scope.getVehicleLocations(true);
 				// Get the vehicle locations after every 15 seconds. Every call to the
 				// method does not check for scope changes since we dont really change in the scope.
 				// If we were then the 3 parameter should be true
 				$interval($scope.getVehicleLocations, 15000, 0, false, false);
+			}, (error) => {
+				showMessageBanner("error", "Error" , "Error occured while getting routes!");
 			});
 		}
 		
@@ -109,47 +107,28 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 		 * 								   the param is set to true.
 		 */
 		$scope.getVehicleLocations = function(fetchStopsAlso) {
-			$http({
-				method: "GET",
-				url: baseUrl + "command=vehicleLocations&t=0&r=" + $scope.selectedRoute.tag
-			}).then(function successCallback(response) {
+			vehicleLocationFactory.getVehicleLocations($scope.selectedRoute.tag).then((vehicles) => {
 				// Remove all the vehicles from the previous route.
 				removeAllVehicles();
-				// If selected route has vehicle information.
-				if (undefined !== response.data.vehicle) {
-					let vehicles = response.data.vehicle;
-					// If it's a single object and there is no direction info.
-					if (!Array.isArray(vehicles) && vehicles.heading < 0) {
-						showMessageBanner("error", "Error" , "No vehicles found for this route!");
-
-						return;
-					}
-					// If it's a single object and there is direction info.
-					if (!Array.isArray(vehicles) && vehicles.heading > 0) {
-						drawVehicle(vehicles);
-					}
-					// If it's an array of objects.
-					if (Array.isArray(vehicles)) {
-						vehicles.forEach((vehicle) => {
-							// If the heading is negative means the vehicle is static or not moving.
-							if (vehicle.heading > 0) {
-								drawVehicle(vehicle);
-							}
-						});
-					}
-
-					if (fetchStopsAlso) {
-						// Remove all the stops from the previous route.
-						removeAllStops();
-						fetchStopsByRoute();
-					}
-				} else {
+				if (vehicles.length === 0) {
 					// Remove all the stops from the previous route.
 					removeAllStops();
 					showMessageBanner("error", "Error" , "No vehicles found for this route!");
+
+					return;
 				}
-			}, function errorCallback(response) {
-				showMessageBanner("error", "Error" , response.statusText);
+				// Draw vehicles on the newly fetched locations.
+				vehicles.forEach((vehicle) => {
+					drawVehicle(vehicle);
+				});
+
+				if (fetchStopsAlso) {
+					// Remove all the stops from the previous route.
+					removeAllStops();
+					fetchStopsByRoute();
+				}
+			}, (error) => {
+				showMessageBanner("error", "Error" , "Error occured while getting locations!");
 			});
 		};
 
@@ -195,42 +174,23 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 		 * So we plot all the routes which are part of each direction.
 		 */
 		function fetchStopsByRoute() {
-			$http({
-				method: "GET",
-				url: baseUrl + "command=routeConfig&terse=true&r=" + $scope.selectedRoute.tag
-			}).then(function successCallback(response) {
-				let route = response.data.route;
-				if (undefined !== route && undefined !== route.direction) {
-					let stops = route.stop;
-					let stopsByRoute = new Map();
-					stops.forEach((stop) => {
-						stopsByRoute.set(stop.tag, {
-							lat: stop.lat,
-							lon: stop.lon,
-							title: stop.title
-						});
-					});
-
-					let directions = route.direction;
-					directions.forEach((direction) => {
-						// New color of stop for each direction so as to distinguish between
-						// stops part of a different direction.
-						let color = d3.hsl(Math.random() * 360, 100, 60);
-						// If the direction is important for the UI.
-						if (direction.useForUI) {
-							let stops = direction.stop;
-							stops.forEach((stop) => {
-								let coordinates = [
-									stopsByRoute.get(stop.tag).lon,
-									stopsByRoute.get(stop.tag).lat
-								];
-								drawStops(coordinates, color);
-							});
-						}
-					});
-				}
-			}, function errorCallback(response) {
-				console.log(response);
+			vehicleDirectionFactory.getDirectionsForRoute($scope.selectedRoute.tag).then((directions) => {
+				let directionColorMap = new Map()
+					color = "red";
+				directions.forEach((direction) => {
+					// New color of stop for each direction so as to distinguish between
+					// stops part of a different direction.
+					if (directionColorMap.has(direction.tag)) {
+						color = directionColorMap.get(direction.tag);
+					} else {
+						color = d3.hsl(Math.random() * 360, 100, 60);
+						directionColorMap.set(direction.tag, color);
+					}
+					
+					drawStops(direction.coordinates, color);
+				});
+			}, (error) => {
+				showMessageBanner("error", "Error" , "Error occured while getting locations!");
 			});
 		}
 
@@ -249,6 +209,6 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 			svg.style("zoom", currentZoomLevel);
 		};
 
-		fetchVehiclesByRoute();
+		fetchRouteList();
 	}
 ]);
