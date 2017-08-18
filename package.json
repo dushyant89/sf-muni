@@ -5,11 +5,15 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node_modules/http-server/bin/http-server -o"
+    "start": "node_modules/http-server/bin/http-server -o",
+    "build-css": "cat assets/styles/sass/style.scss | node_modules/node-sass/bin/node-sass --output-style compact > assets/styles/style.css"
   },
   "author": "Dushyant Sabharwal (dushyant89.github.io)",
   "license": "MIT",
   "dependencies": {
     "http-server": "^0.10.0"
+  },
+  "devDependencies": {
+    "node-sass": "^4.5.3"
   }
 }
