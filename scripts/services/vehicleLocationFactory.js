@@ -1,4 +1,7 @@
 angular.module("sf-muni")
+    /**
+     * Fetches the locations of the vehicles part of the selected route.
+     */
     .factory('vehicleLocationFactory', ["$http", "$q", "apiResponseType", "agency", function($http, $q, apiResponseType, agency) {
         let baseUrl = "http://webservices.nextbus.com/service/" + apiResponseType + "?a=" + agency + "&";
 

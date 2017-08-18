@@ -1,4 +1,8 @@
 angular.module("sf-muni")
+    /**
+     * Fetches the stops which are part of the selected route. The stops are categorized
+     * based on directions.
+     */
     .factory('vehicleDirectionFactory', ["$http", "$q", "apiResponseType", "agency", function($http, $q, apiResponseType, agency) {
         let baseUrl = "http://webservices.nextbus.com/service/" + apiResponseType + "?a=" + agency + "&";
 

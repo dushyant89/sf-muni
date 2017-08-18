@@ -1,4 +1,7 @@
 angular.module("sf-muni")
+    /**
+     * Fetches the list of all routes based on `agencyType`.
+     */
     .factory('routeListFactory', ["$http", "$q", "apiResponseType", "agency", function($http, $q, apiResponseType, agency) {
         let baseUrl = "http://webservices.nextbus.com/service/" + apiResponseType + "?a=" + agency + "&";
 
