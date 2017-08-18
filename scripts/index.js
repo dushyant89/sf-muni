@@ -1,9 +1,7 @@
 /*
 	@TODO
 	1. Showing the loading icon before data loads.
-	2. Separate concerns in the code.
 	3. Writing unit tests.
-	5. Method documentation.
 */
 angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$interval", "mapsToLoad", "agency",
 	function($scope, $http, $interval, mapsToLoad, agency) {
@@ -104,6 +102,12 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 				.attr("transform", " translate(" + x + ", " + y + ") rotate(" + parseInt(vehicle.heading) + ")");
 		}
 
+		/**
+		 * Fetches the locations of the vehicles for the route selected.
+		 *  
+		 * @param {boolean} fetchStopsAlso After fetching the locations we fetch the stops also only if
+		 * 								   the param is set to true.
+		 */
 		$scope.getVehicleLocations = function(fetchStopsAlso) {
 			$http({
 				method: "GET",
@@ -186,6 +190,10 @@ angular.module("sf-muni").controller("MapController", ["$scope", "$http", "$inte
 				.attr("fill", color);
 		}
 
+		/**
+		 * Fetches the stops which are part of a route. Each route has multiple directions.
+		 * So we plot all the routes which are part of each direction.
+		 */
 		function fetchStopsByRoute() {
 			$http({
 				method: "GET",
