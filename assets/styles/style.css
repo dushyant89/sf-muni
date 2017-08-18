@@ -27,6 +27,7 @@ path[name='neighborhood'] {
 
 .control-group {
 	padding: 10px;
+	color: #63aab1;
 }
 
 .btn {
@@ -36,9 +37,9 @@ path[name='neighborhood'] {
 }
 
 .svg-map {
-	border: 2px solid #848080;
-	border-radius: 10px;
-	background-color: #fff9c4; /* yellow lighten-4 */
+	border: 1px solid #848080;
+	border-radius: 15px;
+	background-color: #effbfd;
 	margin-left: 40px;
 }
 
@@ -51,8 +52,9 @@ path[name='neighborhood'] {
 	border-radius: 5px;
 	display: block;
 	position: fixed;
-	top: 20px;
+	top: 25px;
 	left: 45%;
+	text-align: center;
 	z-index: 1;
 }
 
